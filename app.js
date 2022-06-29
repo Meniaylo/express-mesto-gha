@@ -22,8 +22,8 @@ app.use('/cards', cardRouter);
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
-app.get('*', (_req, res) => {
-  res.status(404).send({message: 'Not Found'})
+app.use('*', (_req, res) => {
+  return res.status(404).send({ message: 'Not Found' })
 })
 
 app.listen(PORT, () => {
