@@ -20,13 +20,14 @@ const userController = (req, res) => {
   User.findOne({ _id: userId })
     .then((data) => {
       if (!data) {
-        throw new Error();
+        return res.status(NOTFOUND_ERROR_CODE).send({ message: "Пользователь по указанному _id не найден" });
       }
       res.send(data);
     })
     .catch((err) => {
-      if (err.statusCode === 404) {
-        return res.status(NOTFOUND_ERROR_CODE).send({ message: "Пользователь по указанному _id не найден" });
+      console.log(err.name);
+      if (err.name === 'CastError') {
+        return res.status(DATA_ERROR_CODE).send({ message: "Введите корректные данные" });
       }
       return res.status(COMMON_ERROR_CODE).send({ message: "На сервере произошла ошибка" });
     })
@@ -47,9 +48,10 @@ const createUser = (req, res) => {
 const updateUserProfile = (req, res) => {
   const { _id } = req.user;
   const { name, about } = req.body;
-  User.findByIdAndUpdate(_id, { name, about }, { new: true })
+  User.findByIdAndUpdate(_id, { name, about }, { new: true, runValidators: true })
     .then(user => res.send({ data: user }))
     .catch((err) => {
+      console.log(err.name);
       if (err.name === 'ValidationError') {
         return res.status(DATA_ERROR_CODE).send({ message: "Переданы некорректные данные при обновлении профиля" });
       }
@@ -63,7 +65,7 @@ const updateUserProfile = (req, res) => {
 const updateUserAvatar = (req, res) => {
   const { _id } = req.user;
   const { avatar } = req.body;
-  User.findByIdAndUpdate(_id, { avatar }, { new: true })
+  User.findByIdAndUpdate(_id, { avatar }, { new: true, runValidators: true })
     .then(user => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {

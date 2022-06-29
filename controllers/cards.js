@@ -8,7 +8,7 @@ const cardsController = (_req, res) => {
   Card.find()
   .then((data) => res.send(data))
   .catch((err) => {
-    if (err.statusCode === 400) {
+    if (err.name === 'ValidationError') {
       return res.status(DATA_ERROR_CODE).send({ message: "Введите корректные данные" });
     }
     return res.status(COMMON_ERROR_CODE).send({ message: "На сервере произошла ошибка" });
@@ -17,7 +17,7 @@ const cardsController = (_req, res) => {
 
 const deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
-    .then((_) => res.send({ message: 'Card is removed' }))
+    .then((_) => res.send({ message: 'Карточка удалена' }))
     .catch((err) => {
       if (err.statusCode === 400) {
         return res.status(DATA_ERROR_CODE).send({ message: "Карточка с указанным _id не найдена" });
@@ -31,7 +31,7 @@ const createCard = (req, res) => {
   Card.create({ name, link, owner: req.user._id })
     .then((user) => res.send(user))
     .catch((err) => {
-      if (err.statusCode === 400) {
+      if (err.name === 'ValidationError') {
         return res.status(DATA_ERROR_CODE).send({ message: "Введите корректные данные" });
       }
       return res.status(COMMON_ERROR_CODE).send({ message: "На сервере произошла ошибка" });
@@ -46,7 +46,7 @@ const putCardLike = (req, res) => {
   )
     .then(card => res.send(card))
     .catch((err) => {
-      if (err.statusCode === 400) {
+      if (err.name === 'ValidationError') {
         return res.status(DATA_ERROR_CODE).send({ message: "Переданы некорректные данные для постановки/снятии лайка" });
       }
       if (err.statusCode === 404) {
@@ -65,7 +65,7 @@ const deleteCardLike = (req, res) => {
   )
     .then(card => res.send(card))
     .catch((err) => {
-      if (err.statusCode === 400) {
+      if (err.name === 'ValidationError') {
         return res.status(DATA_ERROR_CODE).send({ message: "Переданы некорректные данные для постановки/снятии лайка" });
       }
       if (err.statusCode === 404) {
