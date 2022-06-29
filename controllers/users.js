@@ -8,7 +8,7 @@ const usersController = (_req, res) => {
   User.find()
   .then((data) => res.send(data))
   .catch((err) => {
-    if (err.statusCode === 400) {
+    if (err.name === 'ValidationError') {
       return res.status(DATA_ERROR_CODE).send({ message: "Введите корректные данные" });
     }
     return res.status(COMMON_ERROR_CODE).send({ message: "На сервере произошла ошибка" });
@@ -37,7 +37,7 @@ const createUser = (req, res) => {
   User.create({ name, about, avatar })
     .then((user) => res.send(user))
     .catch((err) => {
-      if (err.statusCode === 400) {
+      if (err.name === 'ValidationError') {
         return res.status(DATA_ERROR_CODE).send({ message: "Введите корректные данные" });
       }
       return res.status(COMMON_ERROR_CODE).send({ message: "На сервере произошла ошибка" });
@@ -50,7 +50,7 @@ const updateUserProfile = (req, res) => {
   User.findByIdAndUpdate(_id, { name, about }, { new: true })
     .then(user => res.send({ data: user }))
     .catch((err) => {
-      if (err.statusCode === 400) {
+      if (err.name === 'ValidationError') {
         return res.status(DATA_ERROR_CODE).send({ message: "Переданы некорректные данные при обновлении профиля" });
       }
       if (err.statusCode === 404) {
@@ -66,7 +66,7 @@ const updateUserAvatar = (req, res) => {
   User.findByIdAndUpdate(_id, { avatar }, { new: true })
     .then(user => res.send({ data: user }))
     .catch((err) => {
-      if (err.statusCode === 400) {
+      if (err.name === 'ValidationError') {
         return res.status(DATA_ERROR_CODE).send({ message: "Переданы некорректные данные при обновлении аватара" });
       }
       if (err.statusCode === 404) {
