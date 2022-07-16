@@ -4,6 +4,12 @@ const DATA_ERROR_CODE = 400;
 const NOTFOUND_ERROR_CODE = 404;
 const COMMON_ERROR_CODE = 500;
 
+const checkError = (errParameter, res, parameterName, status, messageText) => {
+  if (errParameter === parameterName) {
+    return res.status(status).send({ message: messageText });
+  }
+}
+
 const cardsController = (_req, res) => {
   Card.find()
   .then((data) => res.send(data))
