@@ -17,16 +17,16 @@ const cardsController = (_req, res) => {
 
 const deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
-  .then((card) => {
-    if (!card) {
-      return res.status(NOTFOUND_ERROR_CODE).send({ message: "Карточка c указанным _id не найдена" });
-    }
+  .orFail(new Error('NotValidId'))
+  .then((_card) => {
     res.send({ message: 'Карточка удалена' });
   })
     .catch((err) => {
-      console.log(err.name);
       if (err.name === 'CastError') {
         return res.status(DATA_ERROR_CODE).send({ message: "Введите корректные данные" });
+      }
+      if (err.message === 'NotValidId') {
+        return res.status(NOTFOUND_ERROR_CODE).send({ message: "Карточка c указанным _id не найдена" });
       }
       return res.status(COMMON_ERROR_CODE).send({ message: "На сервере произошла ошибка" });
     })
@@ -50,10 +50,8 @@ const putCardLike = (req, res) => {
     { $addToSet: { likes: req.user._id } },
     { new: true }
   )
+    .orFail(new Error('NotValidId'))
     .then((card) => {
-      if (!card) {
-        return res.status(NOTFOUND_ERROR_CODE).send({ message: "Карточка с указанным _id не найдена" });
-      }
       res.send(card);
     })
     .catch((err) => {
@@ -63,6 +61,9 @@ const putCardLike = (req, res) => {
       }
       if (err.statusCode === 404) {
         return res.status(NOTFOUND_ERROR_CODE).send({ message: "Передан несуществующий _id карточки" });
+      }
+      if (err.message === 'NotValidId') {
+        return res.status(NOTFOUND_ERROR_CODE).send({ message: "Карточка с указанным _id не найдена" });
       }
       return res.status(COMMON_ERROR_CODE).send({ message: "На сервере произошла ошибка" });
     })
@@ -75,10 +76,8 @@ const deleteCardLike = (req, res) => {
     { $pull: { likes: _id } },
     { new: true }
   )
+  .orFail(new Error('NotValidId'))
   .then((card) => {
-    if (!card) {
-      return res.status(NOTFOUND_ERROR_CODE).send({ message: "Карточка с указанным _id не найдена" });
-    }
     res.send(card);
   })
     .catch((err) => {
@@ -87,6 +86,9 @@ const deleteCardLike = (req, res) => {
       }
       if (err.statusCode === 404) {
         return res.status(NOTFOUND_ERROR_CODE).send({ message: "Передан несуществующий _id карточки" });
+      }
+      if (err.message === 'NotValidId') {
+        return res.status(NOTFOUND_ERROR_CODE).send({ message: "Карточка с указанным _id не найдена" });
       }
       return res.status(COMMON_ERROR_CODE).send({ message: "На сервере произошла ошибка" });
     })

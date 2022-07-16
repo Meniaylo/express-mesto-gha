@@ -18,18 +18,18 @@ const usersController = (_req, res) => {
 const userController = (req, res) => {
   const { userId } = req.params;
   User.findOne({ _id: userId })
+    .orFail(new Error('NotValidId'))
     .then((data) => {
-      if (!data) {
-        return res.status(NOTFOUND_ERROR_CODE).send({ message: "Пользователь по указанному _id не найден" });
-      }
       res.send(data);
     })
     .catch((err) => {
-      console.log(err.name);
       if (err.name === 'CastError') {
-        return res.status(DATA_ERROR_CODE).send({ message: "Введите корректные данные" });
+        return res.status(DATA_ERROR_CODE).send({ message: 'Введите корректные данные' });
       }
-      return res.status(COMMON_ERROR_CODE).send({ message: "На сервере произошла ошибка" });
+      if (err.message === 'NotValidId') {
+        return res.status(NOTFOUND_ERROR_CODE).send({ message: 'Пользователь по указанному _id не найден' });
+      }
+      return res.status(COMMON_ERROR_CODE).send({ message: 'На сервере произошла ошибка' });
     })
 };
 
