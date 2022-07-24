@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const bcrypt = require('bcrypt')
 
 const DATA_ERROR_CODE = 400;
 const NOTFOUND_ERROR_CODE = 404;

@@ -4,16 +4,17 @@ const DATA_ERROR_CODE = 400;
 const NOTFOUND_ERROR_CODE = 404;
 const COMMON_ERROR_CODE = 500;
 
-const checkError = (errParameter, res, parameterName, status, messageText) => {
-  if (errParameter === parameterName) {
-    return res.status(status).send({ message: messageText });
-  }
-}
+// const checkError = (errParameter, res, parameterName, status, messageText) => {
+//   if (errParameter === parameterName) {
+//     return res.status(status).send({ message: messageText });
+//   }
+// }
 
 const cardsController = (_req, res) => {
   Card.find()
   .then((data) => res.send(data))
   .catch((err) => {
+    // checkError(err.name, res, 'ValidationError', DATA_ERROR_CODE, 'Введите корректные данные');
     if (err.name === 'ValidationError') {
       return res.status(DATA_ERROR_CODE).send({ message: "Введите корректные данные" });
     }
@@ -27,15 +28,17 @@ const deleteCard = (req, res) => {
   .then((_card) => {
     res.send({ message: 'Карточка удалена' });
   })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        return res.status(DATA_ERROR_CODE).send({ message: "Введите корректные данные" });
-      }
-      if (err.message === 'NotValidId') {
-        return res.status(NOTFOUND_ERROR_CODE).send({ message: "Карточка c указанным _id не найдена" });
-      }
-      return res.status(COMMON_ERROR_CODE).send({ message: "На сервере произошла ошибка" });
-    })
+  .catch((err) => {
+    // checkError(err.name, res, 'CastError', DATA_ERROR_CODE, 'Введите корректные данные');
+    // checkError(err.message, res, 'NotValidId', NOTFOUND_ERROR_CODE, 'Карточка c указанным _id не найдена');
+    if (err.name === 'CastError') {
+      return res.status(DATA_ERROR_CODE).send({ message: "Введите корректные данные" });
+    }
+    if (err.message === 'NotValidId') {
+      return res.status(NOTFOUND_ERROR_CODE).send({ message: "Карточка c указанным _id не найдена" });
+    }
+    return res.status(COMMON_ERROR_CODE).send({ message: "На сервере произошла ошибка" });
+  })
 };
 
 const createCard = (req, res) => {
