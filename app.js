@@ -7,6 +7,8 @@ const bodyParser = require('body-parser');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 
+const { login, createUser } = require("./controllers/users");
+
 const app = express();
 
 const limiter = rateLimit({
@@ -31,12 +33,15 @@ app.use((req, _res, next) => {
 
 app.use('/users', userRouter);
 app.use('/cards', cardRouter);
+app.post('/signin', login);
+app.post('/signup', createUser);
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
 app.use('*', (_req, res) => {
   return res.status(404).send({ message: 'Not Found' })
 })
+
 
 app.listen(PORT, () => {
   console.log(`Listening port ${PORT}`);

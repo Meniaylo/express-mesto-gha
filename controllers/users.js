@@ -1,9 +1,67 @@
 const User = require('../models/user');
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcrypt');
+const validator = require('validator');
+const jwt = require('jsonwebtoken');
 
+const OK_CODE = 200;
 const DATA_ERROR_CODE = 400;
+const UNAUTHORIZED_CODE = 401;
 const NOTFOUND_ERROR_CODE = 404;
 const COMMON_ERROR_CODE = 500;
+
+const JWT_SECRET_KEY = 'My-babys-got-a-secret';
+
+
+const login = (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(DATA_ERROR_CODE).send({ message: "Поля 'email' и 'password' не могут быть пустыми" });
+  }
+
+  if (!validator.isEmail(email)) {
+    return res.status(DATA_ERROR_CODE).send({ message: "Введен некорректный email" });
+  }
+
+  User.findOne({email})
+    .then(user => {
+      if (!user) {
+        return res.status(UNAUTHORIZED_CODE).send({ message: "Неверный email или пароль" });
+      } else {
+        bcrypt.compare(password, user.password, ((error, isValid) => {
+
+          if (error) {
+            return res.status(UNAUTHORIZED_CODE).send({ error: error });
+          }
+
+          if (isValid) {
+            const token = jwt.sign(
+              { _id: user._id },
+              JWT_SECRET_KEY,
+              { expiresIn: '7d' });
+
+            return res
+              .cookie('jwt', token, {
+                httpOnly: true,
+                sameSite: true
+              })
+              .status(OK_CODE)
+              .send({
+                name: user.name,
+                about: user.about,
+                avatar: user.avatar,
+                email: user.email,
+              });
+          }
+
+          if (!isValid) {
+            return res.status(UNAUTHORIZED_CODE).send({ message: "Неверный email или пароль" });
+          }
+
+        }))
+      }
+    })
+};
 
 const usersController = (_req, res) => {
   User.find()
@@ -35,8 +93,19 @@ const userController = (req, res) => {
 };
 
 const createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
+  const { name, about, avatar, email, password } = req.body;
+
+  if (!validator.isEmail(email)) {
+    return res.status(DATA_ERROR_CODE).send({ message: 'Введите корректный email' });
+  }
+
+  bcrypt.hash(password, 10)
+    .then(hash => User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash }))
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -79,4 +148,11 @@ const updateUserAvatar = (req, res) => {
     })
 }
 
-module.exports = { userController, usersController, createUser, updateUserProfile, updateUserAvatar };
+module.exports = {
+  userController,
+  usersController,
+  createUser,
+  updateUserProfile,
+  updateUserAvatar,
+  login
+};
