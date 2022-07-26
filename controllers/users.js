@@ -20,7 +20,7 @@ const login = (req, res) => {
   }
 
   if (!validator.isEmail(email)) {
-    return res.status(DATA_ERROR_CODE).send({ message: "Введен некорректный email" });
+    return res.status(DATA_ERROR_CODE).send({ message: "Введите корректный email" });
   }
 
   User.findOne({email})
@@ -106,6 +106,7 @@ const createUser = (req, res) => {
       avatar,
       email,
       password: hash }))
+      //код возвращает при регистрации юзера вместе с паролем - не дело, надо исправить!
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
