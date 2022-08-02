@@ -3,6 +3,7 @@ const Card = require('../models/card');
 const NotFoundError = require('../errors/not-found-err');
 const DataError = require('../errors/data-err');
 const UnauthorizedError = require('../errors/unauthorized-err');
+const ForbiddenError = require('../errors/forbidden-err');
 
 const cardsController = (_req, res, next) => {
   Card.find()
@@ -24,7 +25,7 @@ const deleteCard = (req, res, next) => {
         card.remove();
         return res.send({ message: 'Карточка удалена' });
       }
-      throw new UnauthorizedError("Не ты порождал - не тебе и убивать!");
+      throw new ForbiddenError("Не ты порождал - не тебе и убивать!");
     })
     .catch((err) => {
       if (err.name === 'CastError') {

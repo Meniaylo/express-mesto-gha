@@ -109,8 +109,13 @@ const createUser = (req, res, next) => {
       avatar,
       email,
       password: hash }))
-      //код возвращает при регистрации юзера вместе с паролем - не дело, надо исправить!
-    .then((user) => res.send(user))
+    .then((user) => res.send({
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      email: user.email,
+    })
+    )
     .catch((err) => {
       if (err.name === 'ValidationError') {
         throw new DataError("Введите корректные данные");
