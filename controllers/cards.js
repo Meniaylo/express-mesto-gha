@@ -2,7 +2,6 @@ const Card = require('../models/card');
 
 const NotFoundError = require('../errors/not-found-err');
 const DataError = require('../errors/data-err');
-const UnauthorizedError = require('../errors/unauthorized-err');
 const ForbiddenError = require('../errors/forbidden-err');
 
 const cardsController = (_req, res, next) => {
@@ -22,8 +21,12 @@ const deleteCard = (req, res, next) => {
     .orFail(new Error('NotValidId'))
     .then((card) => {
       if(card.owner === req.user._id) {
-        card.remove();
-        return res.send({ message: 'Карточка удалена' });
+        return card.remove()
+          .then((_card) => {
+            return res.send({ message: 'Карточка удалена' });
+          })
+          .catch((err) => next(err))
+          .catch(next);
       }
       throw new ForbiddenError("Не ты порождал - не тебе и убивать!");
     })

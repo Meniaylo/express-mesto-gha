@@ -9,8 +9,11 @@ const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const { celebrate, Joi, errors } = require('celebrate');
 const auth = require('./middlewares/auth');
+const errorsHandler = require('./modules/errorsHandler');
 
 const { login, createUser } = require("./controllers/users");
+
+const NotFoundError = require('./errors/not-found-err');
 
 const app = express();
 
@@ -53,23 +56,25 @@ app.use('/cards', cardRouter);
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
-app.use('*', (_req, res) => {
-  return res.status(404).send({ message: 'Not Found' })
+app.use('*', (_req, _res, next) => {
+  next(new NotFoundError("Not Found"));
 })
 
 app.use(errors());
 
-app.use((err, req, res, next) => {
-  const { statusCode = 500, message } = err;
+app.use(errorsHandler);
 
-  res
-    .status(statusCode)
-    .send({
-      message: statusCode === 500
-        ? 'На сервере произошла ошибка'
-        : message
-    });
-});
+// app.use((err, req, res, next) => {
+//   const { statusCode = 500, message } = err;
+
+//   res
+//     .status(statusCode)
+//     .send({
+//       message: statusCode === 500
+//         ? 'На сервере произошла ошибка'
+//         : message
+//     });
+// });
 
 app.listen(PORT, () => {
   console.log(`Listening port ${PORT}`);
