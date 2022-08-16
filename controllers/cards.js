@@ -20,7 +20,7 @@ const deleteCard = (req, res, next) => {
   Card.findOne({ _id: req.params.cardId })
     .orFail(new Error('NotValidId'))
     .then((card) => {
-      if (card.owner === req.user._id) {
+      if (String(card.owner) === req.user._id) {
         return card.remove()
           .then(() => res.send({ message: 'Карточка удалена' }))
           .catch((err) => next(err))

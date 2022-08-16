@@ -54,12 +54,6 @@ const login = (req, res, next) => {
 const usersController = (_req, res, next) => {
   User.find()
     .then((users) => res.send(users))
-    .catch((err) => {
-      if (err) {
-        throw new UnauthorizedError('Вы не авторизованы!');
-      }
-      next(err);
-    })
     .catch(next);
 };
 
