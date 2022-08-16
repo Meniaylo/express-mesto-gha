@@ -1,4 +1,4 @@
-const errorsHandler = (err, req, res, next) => {
+const errorsHandler = (err, req, res) => {
   const { statusCode = 500, message } = err;
 
   res
@@ -6,7 +6,7 @@ const errorsHandler = (err, req, res, next) => {
     .send({
       message: statusCode === 500
         ? 'На сервере произошла ошибка'
-        : message
+        : message,
     });
 };
 

@@ -6,36 +6,34 @@ const ForbiddenError = require('../errors/forbidden-err');
 
 const cardsController = (_req, res, next) => {
   Card.find()
-  .then((data) => res.send(data))
-  .catch((err) => {
-    if (err.name === 'ValidationError') {
-      throw new DataError("Введите корректные данные");
-    }
-    next(err);
-  })
-  .catch(next);
+    .then((data) => res.send(data))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        throw new DataError('Введите корректные данные');
+      }
+      next(err);
+    })
+    .catch(next);
 };
 
 const deleteCard = (req, res, next) => {
-  Card.findOne({_id: req.params.cardId})
+  Card.findOne({ _id: req.params.cardId })
     .orFail(new Error('NotValidId'))
     .then((card) => {
-      if(card.owner === req.user._id) {
+      if (card.owner === req.user._id) {
         return card.remove()
-          .then((_card) => {
-            return res.send({ message: 'Карточка удалена' });
-          })
+          .then(() => res.send({ message: 'Карточка удалена' }))
           .catch((err) => next(err))
           .catch(next);
       }
-      throw new ForbiddenError("Не ты порождал - не тебе и убивать!");
+      throw new ForbiddenError('Не ты порождал - не тебе и убивать!');
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new DataError("Введите корректные данные");
+        throw new DataError('Введите корректные данные');
       }
       if (err.message === 'NotValidId') {
-        throw new NotFoundError("Карточка c указанным _id не найдена");
+        throw new NotFoundError('Карточка c указанным _id не найдена');
       }
       next(err);
     })
@@ -48,7 +46,7 @@ const createCard = (req, res, next) => {
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new DataError("Введите корректные данные");
+        throw new DataError('Введите корректные данные');
       }
       next(err);
     })
@@ -59,7 +57,7 @@ const putCardLike = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
-    { new: true }
+    { new: true },
   )
     .orFail(new Error('NotValidId'))
     .then((card) => {
@@ -67,13 +65,13 @@ const putCardLike = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new DataError("Переданы некорректные данные для постановки лайка");
+        throw new DataError('Переданы некорректные данные для постановки лайка');
       }
       if (err.statusCode === 404) {
-        throw new NotFoundError("Передан несуществующий _id карточки");
+        throw new NotFoundError('Передан несуществующий _id карточки');
       }
       if (err.message === 'NotValidId') {
-        throw new NotFoundError("Карточка с указанным _id не найдена");
+        throw new NotFoundError('Карточка с указанным _id не найдена');
       }
       next(err);
     })
@@ -81,29 +79,35 @@ const putCardLike = (req, res, next) => {
 };
 
 const deleteCardLike = (req, res, next) => {
-  const { _id } = req.user
+  const { _id } = req.user;
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: _id } },
-    { new: true }
+    { new: true },
   )
-  .orFail(new Error('NotValidId'))
-  .then((card) => {
-    res.send(card);
-  })
+    .orFail(new Error('NotValidId'))
+    .then((card) => {
+      res.send(card);
+    })
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new DataError("Переданы некорректные данные для снятия лайка");
+        throw new DataError('Переданы некорректные данные для снятия лайка');
       }
       if (err.statusCode === 404) {
-        throw new NotFoundError("Передан несуществующий _id карточки");
+        throw new NotFoundError('Передан несуществующий _id карточки');
       }
       if (err.message === 'NotValidId') {
-        throw new NotFoundError("Карточка с указанным _id не найдена");
+        throw new NotFoundError('Карточка с указанным _id не найдена');
       }
       next(err);
     })
     .catch(next);
 };
 
-module.exports = { cardsController, createCard, deleteCard, putCardLike, deleteCardLike };
+module.exports = {
+  cardsController,
+  createCard,
+  deleteCard,
+  putCardLike,
+  deleteCardLike,
+};
